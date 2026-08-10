@@ -78,6 +78,17 @@ async function loadDataFromGoogleSheets() {
                     status: c.status || 'active',
                     description: c.description || ''
                 }));
+
+                const uniqueDivs = new Map();
+                careersData.forEach(c => {
+                    if (c.division) {
+                        uniqueDivs.set(c.division, { id: c.division, label: c.divisionLabel || c.division.toUpperCase() });
+                    }
+                });
+                divisions = Array.from(uniqueDivs.values());
+
+                if (typeof populateJobDivisionSelect === 'function') populateJobDivisionSelect();
+                if (typeof renderDivisions === 'function') renderDivisions();
                 if (typeof renderCareers === 'function') renderCareers();
             }
             if (res.data.videos && res.data.videos.length > 0) {
