@@ -92,6 +92,8 @@ async function loadDataFromGoogleSheets() {
                 }));
                 if (typeof renderVideos === 'function') renderVideos();
             }
+
+            document.querySelectorAll('.reveal').forEach(el => el.classList.add('active'));
         }
     } catch (err) {
         console.warn("Error fetching data from Google Sheets:", err);

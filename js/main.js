@@ -166,6 +166,35 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Scroll Reveal Observer
+    function initScrollReveal() {
+        const revealEls = document.querySelectorAll('.reveal');
+        if (!revealEls.length) return;
+
+        if ('IntersectionObserver' in window) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.05, rootMargin: '0px 0px 50px 0px' });
+
+            revealEls.forEach(el => {
+                // If element is already in viewport or dynamic, reveal it
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom >= 0) {
+                    el.classList.add('active');
+                } else {
+                    observer.observe(el);
+                }
+            });
+        } else {
+            revealEls.forEach(el => el.classList.add('active'));
+        }
+    }
+
     // Initialize All Submodules
     initProducts();
     initCart();
@@ -174,4 +203,5 @@ document.addEventListener('DOMContentLoaded', () => {
     initTestimonials();
     initVideos();
     initAdminUI();
+    initScrollReveal();
 });
