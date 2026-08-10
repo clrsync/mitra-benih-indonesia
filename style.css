@@ -14,12 +14,14 @@
     --accent-hover: #043e69;
     --bg-primary: #f7faf7;
     --bg-secondary: #ffffff;
+    --bg-card: #ffffff;
     --text-primary: #1f2937;
     --text-secondary: #4b5563;
     --text-light: #9ca3af;
     --border: #e5e7eb;
     --success: #5cb811;
     --danger: #ef4444;
+    --accent-primary: #5cb811;
 
     /* Shadow & Glass Effects */
     --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
@@ -56,10 +58,12 @@ body.dark-mode {
     --accent-hover: #6dbdff;
     --bg-primary: #070d0a;
     --bg-secondary: #0f1914;
+    --bg-card: #0f1914;
     --text-primary: #f3f4f6;
     --text-secondary: #9ca3af;
     --text-light: #6b7280;
     --border: #1d2d24;
+    --accent-primary: #6ec50f;
     
     --shadow-premium: 0 20px 40px rgba(0, 0, 0, 0.5);
     --glass-bg: rgba(15, 25, 20, 0.8);
@@ -860,21 +864,26 @@ body.dark-mode .theme-toggle .moon-icon {
     border-color: rgba(64, 145, 108, 0.2);
 }
 
-.product-img-container {
+.product-img-container,
+.product-image-container {
     position: relative;
     height: 240px;
     overflow: hidden;
     background-color: #e9ecef;
 }
 
-.product-img-container img {
+.product-img-container img,
+.product-image-container img,
+.product-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform var(--transition-slow);
 }
 
-.product-card:hover .product-img-container img {
+.product-card:hover .product-img-container img,
+.product-card:hover .product-image-container img,
+.product-card:hover .product-image {
     transform: scale(1.08);
 }
 
@@ -892,7 +901,15 @@ body.dark-mode .theme-toggle .moon-icon {
     flex-grow: 1;
 }
 
-.product-cat {
+.product-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.product-cat,
+.product-category {
     font-size: 0.8rem;
     color: var(--text-light);
     text-transform: uppercase;
@@ -905,6 +922,16 @@ body.dark-mode .theme-toggle .moon-icon {
     margin-bottom: 8px;
     font-weight: 700;
     line-height: 1.3;
+}
+
+.product-description {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .product-rating {
@@ -921,7 +948,8 @@ body.dark-mode .theme-toggle .moon-icon {
     margin-left: 4px;
 }
 
-.product-footer {
+.product-footer,
+.product-bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -936,15 +964,21 @@ body.dark-mode .theme-toggle .moon-icon {
     color: var(--primary);
 }
 
-.add-cart-btn {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: var(--secondary-light);
-    color: var(--primary);
-    display: flex;
+.add-cart-btn,
+.add-to-cart-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    background-color: var(--primary);
+    color: #ffffff !important;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border: none;
+    transition: all var(--transition-fast);
 }
 
 .add-cart-btn:hover {
@@ -1240,19 +1274,23 @@ body.dark-mode .theme-toggle .moon-icon {
     grid-template-columns: 1fr 1fr;
 }
 
-.modal-img-side {
+.modal-img-side,
+.modal-image-col {
     height: 100%;
     min-height: 350px;
     background-color: #e9ecef;
 }
 
-.modal-img-side img {
+.modal-img-side img,
+.modal-image-col img,
+.modal-product-image {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.modal-info-side {
+.modal-info-side,
+.modal-info-col {
     padding: 40px;
     display: flex;
     flex-direction: column;
@@ -1267,7 +1305,8 @@ body.dark-mode .theme-toggle .moon-icon {
     margin-bottom: 8px;
 }
 
-.modal-title {
+.modal-title,
+.modal-product-title {
     font-size: 2rem;
     margin-bottom: 12px;
     line-height: 1.2;
@@ -1287,20 +1326,23 @@ body.dark-mode .theme-toggle .moon-icon {
     margin-left: 8px;
 }
 
-.modal-price {
+.modal-price,
+.modal-product-price {
     font-size: 1.75rem;
     font-weight: 800;
     color: var(--primary);
     margin-bottom: 20px;
 }
 
-.modal-desc {
+.modal-desc,
+.modal-product-desc {
     color: var(--text-secondary);
     margin-bottom: 24px;
     font-size: 0.95rem;
 }
 
-.modal-instruction {
+.modal-instruction,
+.instruction-box {
     background-color: var(--bg-primary);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
@@ -1308,7 +1350,8 @@ body.dark-mode .theme-toggle .moon-icon {
     margin-bottom: 24px;
 }
 
-.modal-instruction h4 {
+.modal-instruction h4,
+.instruction-box h4 {
     font-size: 0.95rem;
     color: var(--primary);
     margin-bottom: 6px;
