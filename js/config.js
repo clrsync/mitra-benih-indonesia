@@ -14,15 +14,13 @@ const WHATSAPP_PHONE = "6285165658480";
 function formatImageUrl(url) {
     if (!url || typeof url !== 'string') return url || '';
     
-    if (url.startsWith('data:') || url.startsWith('images/') || url.includes('lh3.googleusercontent.com')) {
+    if (url.startsWith('data:') || url.startsWith('images/')) {
         return url;
     }
 
-    if (url.includes('drive.google.com') || url.includes('docs.google.com')) {
-        const match = url.match(/(?:file\/d\/|id=|\/d\/)([a-zA-Z0-9_-]{20,})/);
-        if (match && match[1]) {
-            return `https://lh3.googleusercontent.com/d/${match[1]}`;
-        }
+    const match = url.match(/(?:file\/d\/|id=|\/d\/)([a-zA-Z0-9_-]{20,})/);
+    if (match && match[1]) {
+        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
     }
     return url;
 }

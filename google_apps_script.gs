@@ -114,7 +114,6 @@ function doPost(e) {
 function processImageStorage(base64Data, filename) {
   if (!base64Data) return "";
   
-  // If it's a new Base64 upload, save backup to Google Drive
   if (base64Data.startsWith('data:image')) {
     try {
       var parts = base64Data.split(';base64,');
@@ -131,12 +130,12 @@ function processImageStorage(base64Data, filename) {
 
       var file = folder.createFile(blob);
       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+      return "https://drive.google.com/thumbnail?id=" + file.getId() + "&sz=w1000";
     } catch (e) {
       Logger.log("Drive backup warning: " + e.toString());
     }
   }
   
-  // Return the image data directly (prevents CORS & CSP redirect issues)
   return base64Data;
 }
 
