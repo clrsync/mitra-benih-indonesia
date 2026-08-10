@@ -20,7 +20,7 @@ function formatImageUrl(url) {
 
     const match = url.match(/(?:file\/d\/|id=|\/d\/)([a-zA-Z0-9_-]{20,})/);
     if (match && match[1]) {
-        return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w1000`;
+        return `https://lh3.googleusercontent.com/d/${match[1]}`;
     }
     return url;
 }
