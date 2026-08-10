@@ -297,7 +297,8 @@ function handleUpdateTestimonial(ss, payload) {
  * Handler: Add Career Opening
  */
 function handleAddCareer(ss, payload) {
-  var sheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'CreatedAt']);
+  var sheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'Requirements', 'CreatedAt']);
+  var reqStr = Array.isArray(payload.requirements) ? payload.requirements.join('\n') : (payload.requirements || '');
 
   sheet.appendRow([
     payload.id || Date.now(),
@@ -308,6 +309,7 @@ function handleAddCareer(ss, payload) {
     payload.date || '',
     payload.status || 'active',
     payload.description || '',
+    reqStr,
     new Date().toISOString()
   ]);
 
@@ -318,12 +320,13 @@ function handleAddCareer(ss, payload) {
  * Handler: Update Career Opening by ID
  */
 function handleUpdateCareer(ss, payload) {
-  var sheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'CreatedAt']);
+  var sheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'Requirements', 'CreatedAt']);
   var data = sheet.getDataRange().getValues();
   var targetId = String(payload.id);
 
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]) === targetId) {
+      var reqStr = Array.isArray(payload.requirements) ? payload.requirements.join('\n') : (payload.requirements || data[i][8]);
       sheet.getRange(i + 1, 2).setValue(payload.title || data[i][1]);
       sheet.getRange(i + 1, 3).setValue(payload.division || data[i][2]);
       sheet.getRange(i + 1, 4).setValue(payload.divisionLabel || data[i][3]);
@@ -331,6 +334,7 @@ function handleUpdateCareer(ss, payload) {
       sheet.getRange(i + 1, 6).setValue(payload.date || data[i][5]);
       sheet.getRange(i + 1, 7).setValue(payload.status || data[i][6]);
       sheet.getRange(i + 1, 8).setValue(payload.description || data[i][7]);
+      sheet.getRange(i + 1, 9).setValue(reqStr);
 
       return createJsonResponse({ status: 'success', message: 'Career updated successfully' });
     }
@@ -416,7 +420,7 @@ function seedInitialData(ss) {
     }
 
     // Seed Careers
-    var careerSheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'CreatedAt']);
+    var careerSheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'Requirements', 'CreatedAt']);
     if (careerSheet.getLastRow() <= 1) {
       var defaultCareers = [
         [
@@ -428,6 +432,7 @@ function seedInitialData(ss) {
           '01 Juli 2026',
           'active',
           'Mencari individu yang kompeten untuk mengembangkan kemitraan bisnis benih tanaman di berbagai wilayah Indonesia.',
+          "Pendidikan minimal D3/S1 Pemasaran, Agribisnis, atau bidang relevan.\nPengalaman kerja minimal 1-2 tahun di bidang penjualan/business development.\nMemiliki kemampuan negosiasi dan komunikasi yang sangat baik.\nSiap melakukan perjalanan dinas untuk perluasan area distribusi.",
           new Date().toISOString()
         ],
         [
@@ -439,6 +444,7 @@ function seedInitialData(ss) {
           '01 Juli 2026',
           'active',
           'Membantu tim pemasaran dalam memberikan konsultasi teknis budidaya tanaman kepada calon pembeli.',
+          "Pendidikan D3/S1 Agroteknologi, Agronomi, atau bidang pertanian sejenis.\nMemahami teknik budidaya bibit buah-buahan, benih sayur, dan pemupukan modern.\nMampu membuat materi edukasi budidaya.\nRamah, sabar, dan memiliki kemampuan pelayanan konsumen yang baik.",
           new Date().toISOString()
         ],
         [
@@ -450,6 +456,7 @@ function seedInitialData(ss) {
           '02 Juli 2026',
           'active',
           'Mengelola pembukuan, transaksi penjualan harian, dan administrasi pengiriman bibit tanaman.',
+          "Pendidikan minimal SMK/D3 Akuntansi atau Keuangan.\nMenguasai aplikasi spreadsheet (MS Excel/Google Sheets).\nTeliti, jujur, bertanggung jawab, dan terbiasa dengan tenggat waktu.\nMemahami administrasi logistik/ekspedisi pengiriman barang.",
           new Date().toISOString()
         ],
         [
@@ -461,6 +468,7 @@ function seedInitialData(ss) {
           '03 Juli 2026',
           'active',
           'Bertanggung jawab dalam perawatan tanaman, penyiraman, okulasi, dan pemeliharaan stok bibit di kebun pembibitan.',
+          "Pendidikan minimal SMK Pertanian atau memiliki pengalaman budidaya tanaman.\nMenguasai teknik perbanyakan tanaman (okulasi, sambung pucuk, stek).\nFisik kuat, jujur, menyukai pekerjaan lapangan/kebun.\nSiap ditempatkan di kebun pembibitan Sleman, Yogyakarta.",
           new Date().toISOString()
         ],
         [
@@ -472,6 +480,7 @@ function seedInitialData(ss) {
           '04 Juli 2026',
           'active',
           'Mengelola media sosial, membuat konten video edukasi tanaman, dan menjalankan iklan digital untuk meningkatkan penjualan benih.',
+          "Pendidikan minimal D3/S1 Ilmu Komunikasi, Pemasaran Digital, atau Desain Grafis.\nMenguasai tools editing video/foto (CapCut, Canva, Photoshop).\nMemahami cara kerja media sosial dan optimasi SEO/SEM.\nMemiliki ketertarikan tinggi di dunia tanaman/berkebun.",
           new Date().toISOString()
         ]
       ];

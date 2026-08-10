@@ -85,7 +85,8 @@ async function loadDataFromGoogleSheets() {
                     type: c.type || '',
                     date: c.date || '',
                     status: c.status || 'active',
-                    description: c.description || ''
+                    description: c.description || '',
+                    requirements: c.requirements ? (typeof c.requirements === 'string' ? c.requirements.split('\n') : c.requirements) : []
                 }));
 
                 if (!res.data.divisions || res.data.divisions.length === 0) {
