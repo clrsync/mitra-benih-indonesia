@@ -3,7 +3,7 @@
 // ==========================================
 // Paste your deployed Google Apps Script Web App URL below to enable Google Sheets & Google Drive syncing.
 // If left empty (""), the app automatically falls back to browser localStorage.
-const GOOGLE_APPS_SCRIPT_URL = "";
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzs5rbCARcktpQPEhXY7GqLdIEF9rShLmLX4HeX9rGwCzTLQa_ufmT95QEOWtPTUE7PA/exec";
 
 /**
  * Send POST request to Google Apps Script Web App
