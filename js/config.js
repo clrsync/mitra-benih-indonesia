@@ -33,7 +33,7 @@ const defaultProducts = [
         rating: 4.8,
         reviews: 98,
         badge: "Terpopuler",
-        image: "images/durian_musang_king.webp",
+        image: "images/durian_musang_king.jpg",
         description: "Bibit Durian Musang King asli dengan sistem kaki tiga (triple rootstock) untuk mempercepat penyerapan nutrisi dan membuat pohon lebih kokoh. Rasa buah manis legit berpadu sedikit pahit khas durian premium.",
         instruction: "Gunakan lubang tanam 60x60x60 cm dengan campuran kompos. Siram pagi hari. Lakukan pemangkasan cabang air secara berkala untuk merangsang pembuahan cepat."
     },
@@ -228,7 +228,7 @@ const defaultVideos = [
     {
         id: 1,
         title: "Tur Kebun Pembibitan Mitra Benih Indonesia",
-        url: "https://drive.google.com/file/d/17vY1JLI3UncvWGU_QNKcnsWUOj6cUo98/preview"
+        url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
     },
     {
         id: 2,
