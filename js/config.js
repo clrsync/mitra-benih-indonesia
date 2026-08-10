@@ -3,7 +3,7 @@
 // ==========================================
 
 // Deployed Google Apps Script Web App URL
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzs5rbCARcktpQPEhXY7GqLdIEF9rShLmLX4HeX9rGwCzTLQa_ufmT95QEOWtPTUE7PA/exec";
+const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpx49cxhcCIF3W6MwglOqAsX4bBmvhJI2JmE9jIerqukuB441XrEibAP6dHIbxWkFHNg/exec";
 
 // WhatsApp Target Phone Number
 const WHATSAPP_PHONE = "6285165658480";

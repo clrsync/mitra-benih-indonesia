@@ -1,10 +1,10 @@
 /**
  * ==============================================================================
- * MITRA BENIH INDONESIA - FULL GOOGLE APPS SCRIPT BACKEND (CRUD ENGINE)
+ * MITRA BENIH INDONESIA - FULL GOOGLE APPS SCRIPT BACKEND (BULLETPROOF ENGINE)
  * ==============================================================================
  * This script handles full CRUD (Create, Read, Update, Delete) operations for
  * Products, Activities, Testimonials, Careers, Videos, and Orders.
- * Images are uploaded to Google Drive, and data records are stored in Google Sheets.
+ * Images are backed up to Google Drive and served reliably via Google Sheets.
  * ==============================================================================
  */
 
@@ -78,6 +78,8 @@ function doPost(e) {
     // CAREERS
     else if (action === 'ADD_CAREER') {
       return handleAddCareer(ss, payload);
+    } else if (action === 'UPDATE_CAREER') {
+      return handleUpdateCareer(ss, payload);
     } else if (action === 'DELETE_CAREER') {
       return handleDeleteRow(ss, 'Careers', payload.id);
     }
@@ -96,7 +98,7 @@ function doPost(e) {
     
     // DIRECT IMAGE UPLOAD ONLY
     else if (action === 'UPLOAD_IMAGE') {
-      var imageUrl = uploadBase64ToDrive(payload.base64Data, payload.filename);
+      var imageUrl = processImageStorage(payload.base64Data, payload.filename);
       return createJsonResponse({ status: 'success', imageUrl: imageUrl });
     } else {
       return createJsonResponse({ status: 'error', message: 'Unknown action: ' + action });
@@ -107,30 +109,35 @@ function doPost(e) {
 }
 
 /**
- * Helper: Upload Base64 Image to Google Drive
+ * Helper: Save Image to Google Drive for Backup & Return Reliable Image Data
  */
-function uploadBase64ToDrive(base64Data, filename) {
-  if (!base64Data || !base64Data.startsWith('data:image')) {
-    return base64Data || ""; // Return existing URL or empty string if not a new base64 upload
+function processImageStorage(base64Data, filename) {
+  if (!base64Data) return "";
+  
+  // If it's a new Base64 upload, save backup to Google Drive
+  if (base64Data.startsWith('data:image')) {
+    try {
+      var parts = base64Data.split(';base64,');
+      var contentType = parts[0].replace('data:', '');
+      var decodedData = Utilities.base64Decode(parts[1]);
+      var blob = Utilities.newBlob(decodedData, contentType, filename || ('upload_' + Date.now() + '.png'));
+
+      var folder;
+      if (DRIVE_FOLDER_ID && DRIVE_FOLDER_ID !== "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE") {
+        folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
+      } else {
+        folder = DriveApp.getRootFolder();
+      }
+
+      var file = folder.createFile(blob);
+      file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    } catch (e) {
+      Logger.log("Drive backup warning: " + e.toString());
+    }
   }
   
-  var parts = base64Data.split(';base64,');
-  var contentType = parts[0].replace('data:', '');
-  var decodedData = Utilities.base64Decode(parts[1]);
-  var blob = Utilities.newBlob(decodedData, contentType, filename || ('upload_' + Date.now() + '.png'));
-
-  var folder;
-  if (DRIVE_FOLDER_ID && DRIVE_FOLDER_ID !== "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE") {
-    folder = DriveApp.getFolderById(DRIVE_FOLDER_ID);
-  } else {
-    folder = DriveApp.getRootFolder();
-  }
-
-  var file = folder.createFile(blob);
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  
-  // Return direct image view link
-  return "https://lh3.googleusercontent.com/d/" + file.getId();
+  // Return the image data directly (prevents CORS & CSP redirect issues)
+  return base64Data;
 }
 
 /**
@@ -138,7 +145,7 @@ function uploadBase64ToDrive(base64Data, filename) {
  */
 function handleAddProduct(ss, payload) {
   var sheet = getOrCreateSheet(ss, 'Products', ['ID', 'Name', 'Category', 'Price', 'Badge', 'ImageURL', 'Description', 'Instruction', 'CreatedAt']);
-  var imageUrl = payload.image ? uploadBase64ToDrive(payload.image, 'product_' + payload.id + '.png') : '';
+  var imageUrl = processImageStorage(payload.image, 'product_' + payload.id + '.png');
   
   sheet.appendRow([
     payload.id || Date.now(),
@@ -166,7 +173,7 @@ function handleUpdateProduct(ss, payload) {
   for (var i = 1; i < data.length; i++) {
     if (String(data[i][0]) === targetId) {
       var existingImageUrl = data[i][5];
-      var finalImageUrl = payload.image ? uploadBase64ToDrive(payload.image, 'product_' + targetId + '.png') : existingImageUrl;
+      var finalImageUrl = payload.image ? processImageStorage(payload.image, 'product_' + targetId + '.png') : existingImageUrl;
 
       sheet.getRange(i + 1, 2).setValue(payload.name || data[i][1]);
       sheet.getRange(i + 1, 3).setValue(payload.category || data[i][2]);
@@ -187,7 +194,7 @@ function handleUpdateProduct(ss, payload) {
  */
 function handleAddActivity(ss, payload) {
   var sheet = getOrCreateSheet(ss, 'Activities', ['ID', 'Title', 'Date', 'ImageURL', 'Description', 'CreatedAt']);
-  var imageUrl = payload.image ? uploadBase64ToDrive(payload.image, 'activity_' + payload.id + '.png') : '';
+  var imageUrl = processImageStorage(payload.image, 'activity_' + payload.id + '.png');
 
   sheet.appendRow([
     payload.id || Date.now(),
@@ -206,7 +213,7 @@ function handleAddActivity(ss, payload) {
  */
 function handleAddTestimonial(ss, payload) {
   var sheet = getOrCreateSheet(ss, 'Testimonials', ['ID', 'Name', 'Role', 'AvatarURL', 'Text', 'Rating', 'CreatedAt']);
-  var avatarUrl = payload.avatar ? uploadBase64ToDrive(payload.avatar, 'avatar_' + payload.id + '.png') : '';
+  var avatarUrl = processImageStorage(payload.avatar, 'avatar_' + payload.id + '.png');
 
   sheet.appendRow([
     payload.id || Date.now(),
@@ -240,6 +247,30 @@ function handleAddCareer(ss, payload) {
   ]);
 
   return createJsonResponse({ status: 'success', message: 'Career opening added successfully' });
+}
+
+/**
+ * Handler: Update Career Opening by ID
+ */
+function handleUpdateCareer(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'CreatedAt']);
+  var data = sheet.getDataRange().getValues();
+  var targetId = String(payload.id);
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === targetId) {
+      sheet.getRange(i + 1, 2).setValue(payload.title || data[i][1]);
+      sheet.getRange(i + 1, 3).setValue(payload.division || data[i][2]);
+      sheet.getRange(i + 1, 4).setValue(payload.divisionLabel || data[i][3]);
+      sheet.getRange(i + 1, 5).setValue(payload.type || data[i][4]);
+      sheet.getRange(i + 1, 6).setValue(payload.date || data[i][5]);
+      sheet.getRange(i + 1, 7).setValue(payload.status || data[i][6]);
+      sheet.getRange(i + 1, 8).setValue(payload.description || data[i][7]);
+
+      return createJsonResponse({ status: 'success', message: 'Career updated successfully' });
+    }
+  }
+  return createJsonResponse({ status: 'error', message: 'Career not found with ID: ' + targetId });
 }
 
 /**
