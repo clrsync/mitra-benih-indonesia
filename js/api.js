@@ -40,7 +40,7 @@ async function loadDataFromGoogleSheets() {
                     rating: 5.0,
                     reviews: 0,
                     badge: p.badge || '',
-                    image: p.imageurl || p.image || 'images/alpukat_miki.webp',
+                    image: formatImageUrl(p.imageurl || p.image || 'images/alpukat_miki.webp'),
                     description: p.description || '',
                     instruction: p.instruction || 'Merawat tanaman secara rutin dan menyiram berkala.'
                 }));
@@ -51,7 +51,7 @@ async function loadDataFromGoogleSheets() {
                     id: a.id || Date.now(),
                     title: a.title || '',
                     date: a.date || '',
-                    image: a.imageurl || a.image || '',
+                    image: formatImageUrl(a.imageurl || a.image || ''),
                     description: a.description || ''
                 }));
                 if (typeof renderActivities === 'function') renderActivities();
@@ -61,7 +61,7 @@ async function loadDataFromGoogleSheets() {
                     id: t.id || Date.now(),
                     name: t.name || '',
                     role: t.role || '',
-                    avatar: t.avatarurl || t.avatar || '',
+                    avatar: formatImageUrl(t.avatarurl || t.avatar || ''),
                     text: t.text || '',
                     rating: Number(t.rating) || 5
                 }));

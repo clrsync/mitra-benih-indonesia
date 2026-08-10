@@ -8,6 +8,25 @@ const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzzs5rbC
 // WhatsApp Target Phone Number
 const WHATSAPP_PHONE = "6285165658480";
 
+/**
+ * Format & Sanitize Image URLs to prevent Google Drive redirect & CSP errors
+ */
+function formatImageUrl(url) {
+    if (!url || typeof url !== 'string') return url || '';
+    
+    if (url.startsWith('data:') || url.startsWith('images/') || url.includes('lh3.googleusercontent.com')) {
+        return url;
+    }
+
+    if (url.includes('drive.google.com') || url.includes('docs.google.com')) {
+        const match = url.match(/(?:file\/d\/|id=|\/d\/)([a-zA-Z0-9_-]{20,})/);
+        if (match && match[1]) {
+            return `https://lh3.googleusercontent.com/d/${match[1]}`;
+        }
+    }
+    return url;
+}
+
 // ==========================================
 // DEFAULT FALLBACK DATASETS
 // ==========================================
