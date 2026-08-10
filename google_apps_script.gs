@@ -17,6 +17,7 @@ var DRIVE_FOLDER_ID = "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE";
 function doGet(e) {
   try {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
+    seedInitialData(ss);
     var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'FETCH_ALL';
     var responseData = {};
 
@@ -31,6 +32,9 @@ function doGet(e) {
     }
     if (action === 'FETCH_ALL' || action === 'FETCH_CAREERS') {
       responseData.careers = getSheetRows(ss, 'Careers');
+    }
+    if (action === 'FETCH_ALL' || action === 'FETCH_DIVISIONS') {
+      responseData.divisions = getSheetRows(ss, 'Divisions');
     }
     if (action === 'FETCH_ALL' || action === 'FETCH_VIDEOS') {
       responseData.videos = getSheetRows(ss, 'Videos');
@@ -86,6 +90,13 @@ function doPost(e) {
       return handleUpdateCareer(ss, payload);
     } else if (action === 'DELETE_CAREER') {
       return handleDeleteRow(ss, 'Careers', payload.id);
+    }
+
+    // DIVISIONS
+    else if (action === 'ADD_DIVISION') {
+      return handleAddDivision(ss, payload);
+    } else if (action === 'DELETE_DIVISION') {
+      return handleDeleteRow(ss, 'Divisions', payload.id);
     }
 
     // VIDEOS
@@ -368,6 +379,109 @@ function handleUpdateVideo(ss, payload) {
     }
   }
   return createJsonResponse({ status: 'error', message: 'Video not found with ID: ' + targetId });
+}
+
+/**
+ * Handler: Add Division Master
+ */
+function handleAddDivision(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Divisions', ['ID', 'Label', 'CreatedAt']);
+  var divId = payload.id || (payload.label || '').toLowerCase().replace(/[^a-z0-9]/g, '-');
+  sheet.appendRow([
+    divId,
+    payload.label || '',
+    new Date().toISOString()
+  ]);
+
+  return createJsonResponse({ status: 'success', message: 'Division added successfully', id: divId });
+}
+
+/**
+ * Helper: Seed Initial Divisions & Careers if Sheets are Empty
+ */
+function seedInitialData(ss) {
+  try {
+    // Seed Divisions
+    var divSheet = getOrCreateSheet(ss, 'Divisions', ['ID', 'Label', 'CreatedAt']);
+    if (divSheet.getLastRow() <= 1) {
+      var defaultDivs = [
+        ['marketing', 'MARKETING', new Date().toISOString()],
+        ['keuangan', 'KEUANGAN', new Date().toISOString()],
+        ['kebun', 'KEBUN', new Date().toISOString()],
+        ['pt-mbi', 'PT MBI', new Date().toISOString()]
+      ];
+      for (var d = 0; d < defaultDivs.length; d++) {
+        divSheet.appendRow(defaultDivs[d]);
+      }
+    }
+
+    // Seed Careers
+    var careerSheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'CreatedAt']);
+    if (careerSheet.getLastRow() <= 1) {
+      var defaultCareers = [
+        [
+          1,
+          'BUSINESS DEVELOPMENT',
+          'marketing',
+          'MARKETING',
+          'BUSINESS DEVELOPMENT',
+          '01 Juli 2026',
+          'active',
+          'Mencari individu yang kompeten untuk mengembangkan kemitraan bisnis benih tanaman di berbagai wilayah Indonesia.',
+          new Date().toISOString()
+        ],
+        [
+          2,
+          'TECHNICAL ASSISTANT',
+          'marketing',
+          'MARKETING',
+          'TECHNICAL ASSISTANT',
+          '01 Juli 2026',
+          'active',
+          'Membantu tim pemasaran dalam memberikan konsultasi teknis budidaya tanaman kepada calon pembeli.',
+          new Date().toISOString()
+        ],
+        [
+          3,
+          'STAF KEUANGAN & ADMINISTRASI',
+          'keuangan',
+          'KEUANGAN',
+          'FINANCE & ADMIN',
+          '02 Juli 2026',
+          'active',
+          'Mengelola pembukuan, transaksi penjualan harian, dan administrasi pengiriman bibit tanaman.',
+          new Date().toISOString()
+        ],
+        [
+          4,
+          'OPERASIONAL NURSERY (KEBUN)',
+          'kebun',
+          'KEBUN',
+          'NURSERY OPERATIONS',
+          '03 Juli 2026',
+          'active',
+          'Bertanggung jawab dalam perawatan tanaman, penyiraman, okulasi, dan pemeliharaan stok bibit di kebun pembibitan.',
+          new Date().toISOString()
+        ],
+        [
+          5,
+          'DIGITAL MARKETING SPECIALIST',
+          'marketing',
+          'MARKETING',
+          'DIGITAL MARKETING',
+          '04 Juli 2026',
+          'active',
+          'Mengelola media sosial, membuat konten video edukasi tanaman, dan menjalankan iklan digital untuk meningkatkan penjualan benih.',
+          new Date().toISOString()
+        ]
+      ];
+      for (var c = 0; c < defaultCareers.length; c++) {
+        careerSheet.appendRow(defaultCareers[c]);
+      }
+    }
+  } catch (err) {
+    Logger.log("Seed initial data warning: " + err.toString());
+  }
 }
 
 /**

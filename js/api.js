@@ -67,6 +67,15 @@ async function loadDataFromGoogleSheets() {
                 }));
                 if (typeof renderTestimonials === 'function') renderTestimonials();
             }
+            if (res.data.divisions && res.data.divisions.length > 0) {
+                divisions = res.data.divisions.map(d => ({
+                    id: String(d.id || d.label || '').toLowerCase().replace(/[^a-z0-9]/g, '-'),
+                    label: String(d.label || d.id || '').toUpperCase()
+                }));
+                if (typeof populateJobDivisionSelect === 'function') populateJobDivisionSelect();
+                if (typeof renderDivisions === 'function') renderDivisions();
+            }
+
             if (res.data.careers && res.data.careers.length > 0) {
                 careersData = res.data.careers.map(c => ({
                     id: c.id || Date.now(),
@@ -79,13 +88,15 @@ async function loadDataFromGoogleSheets() {
                     description: c.description || ''
                 }));
 
-                const uniqueDivs = new Map();
-                careersData.forEach(c => {
-                    if (c.division) {
-                        uniqueDivs.set(c.division, { id: c.division, label: c.divisionLabel || c.division.toUpperCase() });
-                    }
-                });
-                divisions = Array.from(uniqueDivs.values());
+                if (!res.data.divisions || res.data.divisions.length === 0) {
+                    const uniqueDivs = new Map();
+                    careersData.forEach(c => {
+                        if (c.division) {
+                            uniqueDivs.set(c.division, { id: c.division, label: c.divisionLabel || c.division.toUpperCase() });
+                        }
+                    });
+                    divisions = Array.from(uniqueDivs.values());
+                }
 
                 if (typeof populateJobDivisionSelect === 'function') populateJobDivisionSelect();
                 if (typeof renderDivisions === 'function') renderDivisions();

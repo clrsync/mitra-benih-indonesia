@@ -45,6 +45,9 @@ function renderDivisions() {
                     });
                     
                     divisions = divisions.filter(d => d.id !== div.id);
+                    if (GOOGLE_APPS_SCRIPT_URL) {
+                        sendToGoogleAppsScript('DELETE_DIVISION', { id: div.id });
+                    }
                     
                     if (activeDivision === div.id) {
                         activeDivision = "all";
@@ -82,11 +85,15 @@ function renderDivisions() {
                 return;
             }
 
-            divisions.push({ id: newId, label: cleanName.toUpperCase() });
+            const newDiv = { id: newId, label: cleanName.toUpperCase() };
+            divisions.push(newDiv);
+            if (GOOGLE_APPS_SCRIPT_URL) {
+                sendToGoogleAppsScript('ADD_DIVISION', newDiv);
+            }
 
             populateJobDivisionSelect();
             renderDivisions();
-            alert(`Divisi baru "${cleanName.toUpperCase()}" berhasil ditambahkan!`);
+            alert(`Divisi baru "${cleanName.toUpperCase()}" berhasil ditambahkan ke database!`);
         });
 
         careerDivisionNav.appendChild(addDivBtn);
