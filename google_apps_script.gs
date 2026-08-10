@@ -1,20 +1,10 @@
 /**
  * ==============================================================================
- * MITRA BENIH INDONESIA - GOOGLE APPS SCRIPT BACKEND
+ * MITRA BENIH INDONESIA - FULL GOOGLE APPS SCRIPT BACKEND (CRUD ENGINE)
  * ==============================================================================
- * This script serves as the API backend for your static website.
- * It uploads images to Google Drive and stores database records in Google Sheets.
- * 
- * SETUP INSTRUCTIONS:
- * 1. Open your Google Sheet -> Click Extensions -> Apps Script.
- * 2. Paste this entire code into the code editor.
- * 3. Replace DRIVE_FOLDER_ID below with your Google Drive Folder ID.
- *    (Create a folder in Google Drive, open it, and copy the ID from the URL after /folders/...)
- * 4. Click 'Deploy' -> 'New deployment' -> Select type 'Web app'.
- * 5. Set 'Execute as': 'Me'
- * 6. Set 'Who has access': 'Anyone'
- * 7. Click 'Deploy', authorize access, and copy the Web App URL.
- * 8. Paste the Web App URL into app.js (GOOGLE_APPS_SCRIPT_URL).
+ * This script handles full CRUD (Create, Read, Update, Delete) operations for
+ * Products, Activities, Testimonials, Careers, Videos, and Orders.
+ * Images are uploaded to Google Drive, and data records are stored in Google Sheets.
  * ==============================================================================
  */
 
@@ -22,7 +12,7 @@
 var DRIVE_FOLDER_ID = "YOUR_GOOGLE_DRIVE_FOLDER_ID_HERE";
 
 /**
- * Handle HTTP GET Requests (Read database from Google Sheets)
+ * Handle HTTP GET Requests (Read data from Google Sheets)
  */
 function doGet(e) {
   try {
@@ -42,6 +32,9 @@ function doGet(e) {
     if (action === 'FETCH_ALL' || action === 'FETCH_CAREERS') {
       responseData.careers = getSheetRows(ss, 'Careers');
     }
+    if (action === 'FETCH_ALL' || action === 'FETCH_VIDEOS') {
+      responseData.videos = getSheetRows(ss, 'Videos');
+    }
 
     return createJsonResponse({ status: 'success', data: responseData });
   } catch (error) {
@@ -50,7 +43,7 @@ function doGet(e) {
 }
 
 /**
- * Handle HTTP POST Requests (Upload images & append rows to Google Sheets)
+ * Handle HTTP POST Requests (Create, Update, Delete operations)
  */
 function doPost(e) {
   try {
@@ -59,15 +52,50 @@ function doPost(e) {
     var payload = contents.payload;
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
+    // PRODUCTS
     if (action === 'ADD_PRODUCT') {
       return handleAddProduct(ss, payload);
-    } else if (action === 'ADD_ACTIVITY') {
+    } else if (action === 'UPDATE_PRODUCT') {
+      return handleUpdateProduct(ss, payload);
+    } else if (action === 'DELETE_PRODUCT') {
+      return handleDeleteRow(ss, 'Products', payload.id);
+    }
+    
+    // ACTIVITIES
+    else if (action === 'ADD_ACTIVITY') {
       return handleAddActivity(ss, payload);
-    } else if (action === 'ADD_TESTIMONIAL') {
+    } else if (action === 'DELETE_ACTIVITY') {
+      return handleDeleteRow(ss, 'Activities', payload.id);
+    }
+    
+    // TESTIMONIALS
+    else if (action === 'ADD_TESTIMONIAL') {
       return handleAddTestimonial(ss, payload);
-    } else if (action === 'ADD_ORDER') {
+    } else if (action === 'DELETE_TESTIMONIAL') {
+      return handleDeleteRow(ss, 'Testimonials', payload.id);
+    }
+    
+    // CAREERS
+    else if (action === 'ADD_CAREER') {
+      return handleAddCareer(ss, payload);
+    } else if (action === 'DELETE_CAREER') {
+      return handleDeleteRow(ss, 'Careers', payload.id);
+    }
+
+    // VIDEOS
+    else if (action === 'ADD_VIDEO') {
+      return handleAddVideo(ss, payload);
+    } else if (action === 'DELETE_VIDEO') {
+      return handleDeleteRow(ss, 'Videos', payload.id);
+    }
+    
+    // ORDERS
+    else if (action === 'ADD_ORDER') {
       return handleAddOrder(ss, payload);
-    } else if (action === 'UPLOAD_IMAGE') {
+    } 
+    
+    // DIRECT IMAGE UPLOAD ONLY
+    else if (action === 'UPLOAD_IMAGE') {
       var imageUrl = uploadBase64ToDrive(payload.base64Data, payload.filename);
       return createJsonResponse({ status: 'success', imageUrl: imageUrl });
     } else {
@@ -106,10 +134,10 @@ function uploadBase64ToDrive(base64Data, filename) {
 }
 
 /**
- * Handler: Add Product to Google Sheet & Drive
+ * Handler: Add Product
  */
 function handleAddProduct(ss, payload) {
-  var sheet = getOrCreateSheet(ss, 'Products', ['ID', 'Name', 'Category', 'Price', 'Badge', 'ImageURL', 'Description', 'CreatedAt']);
+  var sheet = getOrCreateSheet(ss, 'Products', ['ID', 'Name', 'Category', 'Price', 'Badge', 'ImageURL', 'Description', 'Instruction', 'CreatedAt']);
   var imageUrl = payload.image ? uploadBase64ToDrive(payload.image, 'product_' + payload.id + '.png') : '';
   
   sheet.appendRow([
@@ -120,6 +148,7 @@ function handleAddProduct(ss, payload) {
     payload.badge || '',
     imageUrl,
     payload.description || '',
+    payload.instruction || '',
     new Date().toISOString()
   ]);
 
@@ -127,7 +156,34 @@ function handleAddProduct(ss, payload) {
 }
 
 /**
- * Handler: Add Activity to Google Sheet & Drive
+ * Handler: Update Product by ID
+ */
+function handleUpdateProduct(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Products', ['ID', 'Name', 'Category', 'Price', 'Badge', 'ImageURL', 'Description', 'Instruction', 'CreatedAt']);
+  var data = sheet.getDataRange().getValues();
+  var targetId = String(payload.id);
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === targetId) {
+      var existingImageUrl = data[i][5];
+      var finalImageUrl = payload.image ? uploadBase64ToDrive(payload.image, 'product_' + targetId + '.png') : existingImageUrl;
+
+      sheet.getRange(i + 1, 2).setValue(payload.name || data[i][1]);
+      sheet.getRange(i + 1, 3).setValue(payload.category || data[i][2]);
+      sheet.getRange(i + 1, 4).setValue(payload.price !== undefined ? payload.price : data[i][3]);
+      sheet.getRange(i + 1, 5).setValue(payload.badge !== undefined ? payload.badge : data[i][4]);
+      sheet.getRange(i + 1, 6).setValue(finalImageUrl);
+      sheet.getRange(i + 1, 7).setValue(payload.description || data[i][6]);
+      sheet.getRange(i + 1, 8).setValue(payload.instruction || data[i][7]);
+
+      return createJsonResponse({ status: 'success', message: 'Product updated successfully', imageUrl: finalImageUrl });
+    }
+  }
+  return createJsonResponse({ status: 'error', message: 'Product not found with ID: ' + targetId });
+}
+
+/**
+ * Handler: Add Activity
  */
 function handleAddActivity(ss, payload) {
   var sheet = getOrCreateSheet(ss, 'Activities', ['ID', 'Title', 'Date', 'ImageURL', 'Description', 'CreatedAt']);
@@ -146,7 +202,7 @@ function handleAddActivity(ss, payload) {
 }
 
 /**
- * Handler: Add Testimonial to Google Sheet & Drive
+ * Handler: Add Testimonial
  */
 function handleAddTestimonial(ss, payload) {
   var sheet = getOrCreateSheet(ss, 'Testimonials', ['ID', 'Name', 'Role', 'AvatarURL', 'Text', 'Rating', 'CreatedAt']);
@@ -166,22 +222,84 @@ function handleAddTestimonial(ss, payload) {
 }
 
 /**
- * Handler: Add Order Submission to Google Sheet
+ * Handler: Add Career Opening
+ */
+function handleAddCareer(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Careers', ['ID', 'Title', 'Division', 'DivisionLabel', 'Type', 'Date', 'Status', 'Description', 'CreatedAt']);
+
+  sheet.appendRow([
+    payload.id || Date.now(),
+    payload.title || '',
+    payload.division || '',
+    payload.divisionLabel || '',
+    payload.type || '',
+    payload.date || '',
+    payload.status || 'active',
+    payload.description || '',
+    new Date().toISOString()
+  ]);
+
+  return createJsonResponse({ status: 'success', message: 'Career opening added successfully' });
+}
+
+/**
+ * Handler: Add Video Embed
+ */
+function handleAddVideo(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Videos', ['ID', 'Title', 'Category', 'CategoryLabel', 'Url', 'Type', 'Description', 'CreatedAt']);
+
+  sheet.appendRow([
+    payload.id || Date.now(),
+    payload.title || '',
+    payload.category || '',
+    payload.categoryLabel || '',
+    payload.url || '',
+    payload.type || 'iframe',
+    payload.description || '',
+    new Date().toISOString()
+  ]);
+
+  return createJsonResponse({ status: 'success', message: 'Video added successfully' });
+}
+
+/**
+ * Handler: Add Order Log
  */
 function handleAddOrder(ss, payload) {
-  var sheet = getOrCreateSheet(ss, 'Orders', ['OrderID', 'CustomerName', 'Phone', 'Address', 'Items', 'Total', 'CreatedAt']);
+  var sheet = getOrCreateSheet(ss, 'Orders', ['OrderID', 'CustomerName', 'Phone', 'Address', 'Courier', 'Items', 'Total', 'CreatedAt']);
 
   sheet.appendRow([
     payload.orderId || ('ORD-' + Date.now()),
     payload.customerName || '',
     payload.phone || '',
     payload.address || '',
+    payload.courier || '',
     JSON.stringify(payload.items || []),
     payload.total || 0,
     new Date().toISOString()
   ]);
 
   return createJsonResponse({ status: 'success', message: 'Order logged successfully' });
+}
+
+/**
+ * Generic Helper: Delete Row by ID
+ */
+function handleDeleteRow(ss, sheetName, id) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) return createJsonResponse({ status: 'error', message: 'Sheet not found: ' + sheetName });
+
+  var data = sheet.getDataRange().getValues();
+  var targetId = String(id);
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === targetId) {
+      sheet.deleteRow(i + 1);
+      return createJsonResponse({ status: 'success', message: 'Deleted record ID: ' + targetId + ' from ' + sheetName });
+    }
+  }
+
+  return createJsonResponse({ status: 'error', message: 'Record not found with ID: ' + targetId });
 }
 
 /**
