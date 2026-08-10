@@ -47,7 +47,7 @@ function renderCatalog() {
 
         card.innerHTML = `
             <div class="product-image-container">
-                <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy">
+                <img src="${product.image}" alt="${product.name}" class="product-image" loading="lazy" onerror="this.onerror=null;this.src='images/alpukat_miki.webp';">
                 ${badgeHTML}
             </div>
             <div class="product-info">
@@ -138,7 +138,7 @@ function openProductModal(product) {
 
     modalContentGrid.innerHTML = `
         <div class="modal-image-col">
-            <img src="${product.image}" alt="${product.name}" class="modal-product-image">
+            <img src="${product.image}" alt="${product.name}" class="modal-product-image" onerror="this.onerror=null;this.src='images/alpukat_miki.webp';">
         </div>
         <div class="modal-info-col">
             <span class="product-category">${product.category.toUpperCase()}</span>

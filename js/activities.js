@@ -21,7 +21,7 @@ function renderActivities() {
 
         card.innerHTML = `
             <div style="position: relative; height: 200px; overflow: hidden;">
-                <img src="${act.image}" alt="${act.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                <img src="${act.image}" alt="${act.title}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='images/nursery_view.jpg';">
                 <span style="position: absolute; bottom: 10px; right: 10px; background: rgba(0,0,0,0.7); color: white; padding: 4px 10px; border-radius: var(--radius-sm); font-size: 0.75rem;">📅 ${act.date}</span>
             </div>
             <div style="padding: 20px; flex-grow: 1; display: flex; flex-direction: column;">
