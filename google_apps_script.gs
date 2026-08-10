@@ -64,6 +64,8 @@ function doPost(e) {
     // ACTIVITIES
     else if (action === 'ADD_ACTIVITY') {
       return handleAddActivity(ss, payload);
+    } else if (action === 'UPDATE_ACTIVITY') {
+      return handleUpdateActivity(ss, payload);
     } else if (action === 'DELETE_ACTIVITY') {
       return handleDeleteRow(ss, 'Activities', payload.id);
     }
@@ -71,6 +73,8 @@ function doPost(e) {
     // TESTIMONIALS
     else if (action === 'ADD_TESTIMONIAL') {
       return handleAddTestimonial(ss, payload);
+    } else if (action === 'UPDATE_TESTIMONIAL') {
+      return handleUpdateTestimonial(ss, payload);
     } else if (action === 'DELETE_TESTIMONIAL') {
       return handleDeleteRow(ss, 'Testimonials', payload.id);
     }
@@ -87,6 +91,8 @@ function doPost(e) {
     // VIDEOS
     else if (action === 'ADD_VIDEO') {
       return handleAddVideo(ss, payload);
+    } else if (action === 'UPDATE_VIDEO') {
+      return handleUpdateVideo(ss, payload);
     } else if (action === 'DELETE_VIDEO') {
       return handleDeleteRow(ss, 'Videos', payload.id);
     }
@@ -208,6 +214,30 @@ function handleAddActivity(ss, payload) {
 }
 
 /**
+ * Handler: Update Activity by ID
+ */
+function handleUpdateActivity(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Activities', ['ID', 'Title', 'Date', 'ImageURL', 'Description', 'CreatedAt']);
+  var data = sheet.getDataRange().getValues();
+  var targetId = String(payload.id);
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === targetId) {
+      var existingImageUrl = data[i][3];
+      var finalImageUrl = payload.image ? processImageStorage(payload.image, 'activity_' + targetId + '.png') : existingImageUrl;
+
+      sheet.getRange(i + 1, 2).setValue(payload.title || data[i][1]);
+      sheet.getRange(i + 1, 3).setValue(payload.date || data[i][2]);
+      sheet.getRange(i + 1, 4).setValue(finalImageUrl);
+      sheet.getRange(i + 1, 5).setValue(payload.description || data[i][4]);
+
+      return createJsonResponse({ status: 'success', message: 'Activity updated successfully', imageUrl: finalImageUrl });
+    }
+  }
+  return createJsonResponse({ status: 'error', message: 'Activity not found with ID: ' + targetId });
+}
+
+/**
  * Handler: Add Testimonial
  */
 function handleAddTestimonial(ss, payload) {
@@ -225,6 +255,31 @@ function handleAddTestimonial(ss, payload) {
   ]);
 
   return createJsonResponse({ status: 'success', message: 'Testimonial added successfully', avatarUrl: avatarUrl });
+}
+
+/**
+ * Handler: Update Testimonial by ID
+ */
+function handleUpdateTestimonial(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Testimonials', ['ID', 'Name', 'Role', 'AvatarURL', 'Text', 'Rating', 'CreatedAt']);
+  var data = sheet.getDataRange().getValues();
+  var targetId = String(payload.id);
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === targetId) {
+      var existingAvatarUrl = data[i][3];
+      var finalAvatarUrl = payload.avatar ? processImageStorage(payload.avatar, 'avatar_' + targetId + '.png') : existingAvatarUrl;
+
+      sheet.getRange(i + 1, 2).setValue(payload.name || data[i][1]);
+      sheet.getRange(i + 1, 3).setValue(payload.role || data[i][2]);
+      sheet.getRange(i + 1, 4).setValue(finalAvatarUrl);
+      sheet.getRange(i + 1, 5).setValue(payload.text || data[i][4]);
+      sheet.getRange(i + 1, 6).setValue(payload.rating !== undefined ? payload.rating : data[i][5]);
+
+      return createJsonResponse({ status: 'success', message: 'Testimonial updated successfully', avatarUrl: finalAvatarUrl });
+    }
+  }
+  return createJsonResponse({ status: 'error', message: 'Testimonial not found with ID: ' + targetId });
 }
 
 /**
@@ -290,6 +345,29 @@ function handleAddVideo(ss, payload) {
   ]);
 
   return createJsonResponse({ status: 'success', message: 'Video added successfully' });
+}
+
+/**
+ * Handler: Update Video by ID
+ */
+function handleUpdateVideo(ss, payload) {
+  var sheet = getOrCreateSheet(ss, 'Videos', ['ID', 'Title', 'Category', 'CategoryLabel', 'Url', 'Type', 'Description', 'CreatedAt']);
+  var data = sheet.getDataRange().getValues();
+  var targetId = String(payload.id);
+
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === targetId) {
+      sheet.getRange(i + 1, 2).setValue(payload.title || data[i][1]);
+      sheet.getRange(i + 1, 3).setValue(payload.category || data[i][2]);
+      sheet.getRange(i + 1, 4).setValue(payload.categoryLabel || data[i][3]);
+      sheet.getRange(i + 1, 5).setValue(payload.url || data[i][4]);
+      sheet.getRange(i + 1, 6).setValue(payload.type || data[i][5]);
+      sheet.getRange(i + 1, 7).setValue(payload.description || data[i][6]);
+
+      return createJsonResponse({ status: 'success', message: 'Video updated successfully' });
+    }
+  }
+  return createJsonResponse({ status: 'error', message: 'Video not found with ID: ' + targetId });
 }
 
 /**

@@ -255,6 +255,9 @@
                 <span class="badge badge-accent">Kegiatan Kami</span>
                 <h2 style="margin-top: 12px;">Kegiatan & Galeri Terbaru</h2>
                 <p>Dokumentasi aktivitas pengiriman bibit, verifikasi pertanian, dan budidaya harian di nursery kami.</p>
+                <div style="margin-top: 16px;">
+                    <button class="btn btn-primary" id="add-activity-btn" style="display: none; font-size: 0.9rem; padding: 10px 22px;">➕ Tambah Kegiatan Baru (Admin)</button>
+                </div>
             </div>
             
             <div class="activities-grid reveal" id="activities-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 30px; margin-top: 40px;">
@@ -309,6 +312,9 @@
                 <span class="badge badge-success">Katalog Online</span>
                 <h2 style="margin-top: 12px;">Pilih Bibit & Benih Pilihan Anda</h2>
                 <p>Cari, filter kategori, dan pilih benih tanaman unggul untuk kebun impian Anda.</p>
+                <div style="margin-top: 16px;">
+                    <button class="btn btn-primary" id="add-product-btn" style="display: none; font-size: 0.9rem; padding: 10px 22px;">➕ Tambah Produk Baru (Admin)</button>
+                </div>
             </div>
 
             <!-- Filter & Search Bar -->
@@ -354,13 +360,13 @@
 
             <!-- Button to toggle Testimonial Form -->
             <div class="reveal" style="text-align: center; margin-top: 40px;">
-                <button class="btn btn-outline" id="toggle-testimonial-form-btn">Tulis Testimoni Anda</button>
+                <button class="btn btn-outline" id="toggle-testi-form-btn">Tulis Testimoni Anda</button>
             </div>
 
             <!-- Toggleable Testimonial Form Container -->
             <div class="testimonial-form-container reveal" id="testimonial-form-wrapper"
                 style="display: none; max-width: 600px; margin: 30px auto 0 auto; background-color: var(--bg-primary); border: 1px solid var(--border); padding: 30px; border-radius: var(--radius-md);">
-                <form id="submit-testimonial-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <form id="submit-testi-form" style="display: flex; flex-direction: column; gap: 16px;">
                     <h3 style="color: var(--primary); text-align: center;">Tulis Testimoni Anda</h3>
                     <p style="color: var(--text-secondary); text-align: center; font-size: 0.9rem;">Ulasan Anda sangat
                         berarti bagi kami dan pelanggan lainnya.</p>
@@ -419,6 +425,9 @@
                 <h2
                     style="text-align: center; color: var(--primary); font-size: 2.2rem; font-weight: 700; margin-bottom: 10px;">
                     Informasi Karir</h2>
+                <div style="text-align: center; margin-top: 10px;">
+                    <button class="btn btn-primary" id="add-career-btn" style="display: none; font-size: 0.9rem; padding: 10px 22px;">➕ Tambah Lowongan Baru (Admin)</button>
+                </div>
 
                 <!-- Search lowongan -->
                 <div class="career-search-wrapper"

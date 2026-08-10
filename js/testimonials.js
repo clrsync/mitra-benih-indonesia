@@ -23,19 +23,43 @@ function renderTestimonials() {
         const card = document.createElement('div');
         card.classList.add('testimonial-card');
 
+        const adminActionsHTML = isAdmin ? `
+            <div style="margin-top: 15px; padding-top: 10px; border-top: 1px solid var(--border); text-align: right;">
+                <button class="delete-testimonial-btn" data-id="${testi.id}" style="padding: 4px 10px; background: #ef4444; color: white; border: none; border-radius: var(--radius-sm); font-size: 0.8rem; cursor: pointer;">🗑️ Hapus Testimoni</button>
+            </div>
+        ` : '';
+
         card.innerHTML = `
             <div class="testimonial-stars" style="margin-bottom: 12px; font-size: 1.1rem;">
                 ${starsHTML}
             </div>
             <p class="testimonial-text">"${testi.text}"</p>
             <div class="testimonial-user">
-                <img src="${testi.avatar}" alt="${testi.name}" class="testimonial-avatar" loading="lazy">
+                <img src="${testi.avatar}" alt="${testi.name}" class="testimonial-avatar" loading="lazy" onerror="this.onerror=null;this.src='images/avatar1.webp';">
                 <div class="testimonial-info">
                     <h4 class="testimonial-name">${testi.name}</h4>
                     <span class="testimonial-role">${testi.role}</span>
                 </div>
             </div>
+            ${adminActionsHTML}
         `;
+
+        if (isAdmin) {
+            const delBtn = card.querySelector('.delete-testimonial-btn');
+            if (delBtn) {
+                delBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm(`Apakah Anda yakin ingin menghapus testimoni dari "${testi.name}"?`)) {
+                        customTestimonials = customTestimonials.filter(t => t.id !== testi.id);
+                        if (GOOGLE_APPS_SCRIPT_URL) {
+                            sendToGoogleAppsScript('DELETE_TESTIMONIAL', { id: testi.id });
+                        }
+                        renderTestimonials();
+                        alert(`Testimoni dari "${testi.name}" berhasil dihapus.`);
+                    }
+                });
+            }
+        }
 
         testimonialsGrid.appendChild(card);
     });
