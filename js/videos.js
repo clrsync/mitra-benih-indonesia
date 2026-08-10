@@ -16,7 +16,7 @@ function parseVideoUrl(url) {
     const gdMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
     if (gdMatch && gdMatch[1]) {
         const gdId = gdMatch[1];
-        return { type: 'iframe', url: `https://drive.google.com/file/d/${gdId}/preview` };
+        return { type: 'gdrive', url: url, id: gdId, downloadUrl: `https://drive.google.com/uc?export=download&id=${gdId}` };
     }
 
     // Instagram Match
@@ -43,7 +43,11 @@ function parseVideoUrl(url) {
         return { type: 'video', url: url };
     }
 
-    // Default Fallback
+    // Default Fallback (If contains drive.google.com, handle as gdrive)
+    if (url.includes('drive.google.com')) {
+        return { type: 'gdrive', url: url, id: '', downloadUrl: url };
+    }
+
     return { type: 'iframe', url: url };
 }
 
@@ -62,6 +66,17 @@ function renderVideos() {
         let embedHTML = "";
         if (parsed.type === 'video') {
             embedHTML = `<video controls style="width:100%; height:220px; object-fit:cover; background:#000;"><source src="${parsed.url}" type="video/mp4">Browser Anda tidak mendukung pemutaran video.</video>`;
+        } else if (parsed.type === 'gdrive') {
+            embedHTML = `
+                <div style="height: 220px; background: linear-gradient(135deg, #1e293b, #0f172a); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 20px; text-align: center;">
+                    <div style="width: 54px; height: 54px; border-radius: 50%; background: var(--accent-primary); display: flex; align-items: center; justify-content: center; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                    </div>
+                    <a href="${parsed.url}" target="_blank" rel="noopener noreferrer" class="btn btn-primary-sm" style="text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                        ▶️ Putar Video di Google Drive
+                    </a>
+                </div>
+            `;
         } else {
             let fileNoticeHTML = "";
             if (window.location.protocol === 'file:' && parsed.type === 'iframe') {
